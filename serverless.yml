@@ -3,6 +3,7 @@ service: covid19-lga-arcgis-au # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs12.x
+  region: ap-southeast-2
   timeout: 60 # optional, in seconds, default is 6
   iamRoleStatements:
     - Effect: "Allow"
@@ -17,6 +18,6 @@ functions:
     timeout: 60 # optional, in seconds, default is 6
     events:
       - schedule:
-        rate: rate(1 hour)
+        rate: rate(3 hour)
 plugins:
   - serverless-offline
