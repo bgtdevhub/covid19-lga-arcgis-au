@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 routes(app);
 
-// module.exports.handler = serverless(app);
+module.exports.handler = serverless(app);
 
 //USE THIS FOR LOCAL SERVER
 var server = app.listen(3050, function () {

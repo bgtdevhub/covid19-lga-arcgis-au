@@ -4,6 +4,8 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: ap-southeast-2
+  deploymentBucket:
+    name: bgtdevhub
   timeout: 60 # optional, in seconds, default is 6
   iamRoleStatements:
     - Effect: "Allow"
