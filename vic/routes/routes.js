@@ -161,20 +161,20 @@ const appRouter = app => {
             const locationsData = clientSourceData.sheets["locations"];
 
             //3. Update data to ArcGIS online feature layer
-            const victoriaShort = "VIC";
-            const victoriaLong = "Victoria";
+            const stateShort = "VIC";
+            const stateLong = "Victoria";
 
             let updatedFeatures = [];
 
-            const victoriaFeatures = featureData.features.filter(x => x.attributes.STE_NAME16 === victoriaLong);
-            const victoriaLocationsTotal = locationsData.filter(x => x["State"] === victoriaShort);
+            const stateFeatures = featureData.features.filter(x => x.attributes.STE_NAME16 === stateLong);
+            const stateLocationsTotal = locationsData.filter(x => x["State"] === stateShort);
 
-            for (const victoriaLocation of victoriaLocationsTotal) {
-                const locationFeatureData = victoriaFeatures.find(x => x.attributes.LGA_NAME19 === victoriaLocation.Location);
+            for (const stateLocation of stateLocationsTotal) {
+                const locationFeatureData = stateFeatures.find(x => x.attributes.LGA_NAME19 === stateLocation.Location);
 
                 if (locationFeatureData) {
-                    const cases = victoriaLocation["Cases"] ? victoriaLocation["Cases"] : null;
-                    const date = getDayMonthYear(victoriaLocation["Date"]);
+                    const cases = stateLocation["Cases"] ? stateLocation["Cases"] : null;
+                    const date = getDayMonthYear(stateLocation["Date"]);
 
                     const updatedFeatureData = {
                         objectId: locationFeatureData.attributes.OBJECTID,
@@ -186,7 +186,7 @@ const appRouter = app => {
                 }
             }
 
-            const updateLatestResult = await updateStatesFeature(updatedFeatures, token);
+            await updateStatesFeature(updatedFeatures, token);
 
             res.status(200).send('Synchronization completed.');
 

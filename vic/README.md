@@ -1,5 +1,5 @@
-# covid19-lga-arcgis-au
-Lambda function that synchronize local government areas (LGA) related to COVID-19 updates into ArcGIS Online at hourly basis
+# covid19-lga-vic-arcgis-au
+Lambda function that synchronize Australian Local Government Areas (LGA) for VICTORIA state related to COVID-19 updates into ArcGIS Online on hourly basis.
 
 ## Getting Started
 
@@ -7,7 +7,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### How it works?
 
-In every xx minutes, this lambda function will call an API provided by The Guardian. This API provides the details of all local government areas with the latest COVID-19 data. This lambda function will dynamically update the total cases of each location, the features of arcGIS layer. 
+In every xx minutes, this lambda function will call an API provided by The Guardian. This API provides the details of all local government areas in Victoria with the latest COVID-19 data. This lambda function will dynamically update the total cases of each location, the features of arcGIS layer.
 
 ### Prerequisites
 

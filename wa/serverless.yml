@@ -1,4 +1,4 @@
-service: covid19-lga-arcgis-au # NOTE: update this with your service name
+service: covid19-lga-wa-arcgis-au # NOTE: update this with your service name
 
 provider:
   name: aws
