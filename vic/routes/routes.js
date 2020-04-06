@@ -1,4 +1,6 @@
 const request = require('request');
+const fetch = require('node-fetch');
+const FormData = require('form-data');
 const settings = require('../global-settings.js');
 
 const requestToken = () =>
@@ -45,23 +47,24 @@ const getFeatureData = token =>
 
 const getClientSoureUpdates = () =>
     new Promise((resolve, reject) => {
-        request(
-            {
-                url: settings.covid19SoureUrl,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': '',
-                },
-                method: 'GET',
-                encoding: null
-            },
-            function (error, res, body) {
-                if (res.statusCode == 200 && !error) {
-                    resolve(JSON.parse(body));
-                }
+        const rawBody = JSON.stringify(settings.covid19SourceRequestBody);
+        const requestOptions = {
+            method: 'POST',
+            body: rawBody,
+        };
+
+        fetch(`${settings.covid19SoureUrl}`, requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                resolve({
+                    lga: result['results'][0]['result']['data']['dsr']['DS'][0]['PH'][0]['DM0'],
+                    date: result['results'][0]['result']['data']['timestamp']
+                });
+            })
+            .catch(error => {
+                console.log('error', error);
                 reject(error);
-            }
-        );
+            });
     });
 
 const updateStatesFeature = (updatedSites, token) =>
@@ -102,49 +105,9 @@ const updateStatesFeature = (updatedSites, token) =>
         );
     });
 
-const getFormattedNumber = value => {
-    if (value) {
-        if (!isNaN(value)) {
-            return value;
-        }
-        else {
-            const cleaned = value.replace(",", "");
-            return Number(cleaned);
-        }
-    }
-    else {
-        return null;
-    }
-}
-
-const getMidpoint = value => {
-    if (value) {
-        if (value.includes("-")) {
-            const points = value.split("-");
-            const minPoint = getFormattedNumber(points[0]);
-            const maxPoint = getFormattedNumber(points[1]);
-
-            return Math.floor((minPoint + maxPoint) / 2);
-        } else {
-            return getFormattedNumber(value);
-        }
-    }
-    else {
-        return null;
-    }
-}
-
-const getDayMonthYear = (date) => {
-    const dateString = date.split('/');
-    const day = dateString[0];
-    const month = dateString[1];
-    const year = dateString[2];
-
-    return new Date(year, month - 1, day);
-}
-
 const getEsriFormattedDate = (date) => {
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    const currDate = new Date(date);
+    return `${currDate.getFullYear()}-${currDate.getMonth() + 1}-${currDate.getDate()}`;
 }
 
 const appRouter = app => {
@@ -158,29 +121,26 @@ const appRouter = app => {
             //2. Get data from client resource & existing ArcGIS online feature layer
             const clientSourceData = await getClientSoureUpdates();
             const featureData = await getFeatureData(token);
-            const locationsData = clientSourceData.sheets["locations"];
 
             //3. Update data to ArcGIS online feature layer
-            const stateShort = "VIC";
             const stateLong = "Victoria";
 
             let updatedFeatures = [];
 
             const stateFeatures = featureData.features.filter(x => x.attributes.STE_NAME16 === stateLong);
-            const stateLocationsTotal = locationsData.filter(x => x["State"] === stateShort);
+            const currDate = getEsriFormattedDate(clientSourceData.date);
 
-            for (const stateLocation of stateLocationsTotal) {
-                const locationFeatureData = stateFeatures.find(x => x.attributes.LGA_NAME19 === stateLocation.Location);
+            for (let i = 0; i < clientSourceData.lga.length; i++) {
+                const locationFeatureData = stateFeatures.find(x => x.attributes.LGA_NAME19 === clientSourceData.lga[i]["C"][0]);
 
                 if (locationFeatureData) {
-                    const cases = stateLocation["Cases"] ? stateLocation["Cases"] : null;
-                    const date = getDayMonthYear(stateLocation["Date"]);
+                    const cases = clientSourceData.lga[i]["R"] ? clientSourceData.lga[i - 1]["C"][1] : clientSourceData.lga[i]["C"][1];
 
                     const updatedFeatureData = {
                         objectId: locationFeatureData.attributes.OBJECTID,
-                        cases: getMidpoint(cases),
+                        cases: cases,
                         casesStr: cases,
-                        lastUpdated: getEsriFormattedDate(date),
+                        lastUpdated: currDate,
                     };
                     updatedFeatures.push(updatedFeatureData);
                 }
