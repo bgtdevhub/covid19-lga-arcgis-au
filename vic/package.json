@@ -17,7 +17,7 @@
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
     "nodemon": "^2.0.2",
-    "protobufjs": "^6.8.8",
+    "protobufjs": "^6.11.3",
     "request": "^2.88.0",
     "serverless-http": "^1.10.1"
   },
